@@ -4,6 +4,7 @@
   "description": "This project is aimed at providing households with electrical insurance packages and plans that are flexible and affordable putting into consideration their current earning power.",
   "main": "index.js",
   "scripts": {
+    "test": "jest",
     "dev": "nodemon \"./src/index.js\"",
     "lint": "eslint src/**/*.js",
     "format": "eslint src/**/*.js --fix",
