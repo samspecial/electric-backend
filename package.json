@@ -1,0 +1,38 @@
+{
+  "name": "electric-be",
+  "version": "1.0.0",
+  "description": "This project is aimed at providing households with electrical insurance packages and plans that are flexible and affordable putting into consideration their current earning power.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon \"./src/index.js\"",
+    "lint": "eslint src/**/*.js",
+    "format": "eslint src/**/*.js --fix",
+    "prettier-format": "prettier -w ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samspecial/electric-be.git"
+  },
+  "keywords": [
+    "electric",
+    "insurance"
+  ],
+  "author": "'Samuel Osinloye'",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/samspecial/electric-be/issues"
+  },
+  "homepage": "https://github.com/samspecial/electric-be#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.31.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.23.4",
+    "eslint-plugin-prettier": "^3.4.0",
+    "nodemon": "^2.0.12",
+    "prettier": "^2.3.2"
+  }
+}
