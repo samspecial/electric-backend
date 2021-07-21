@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "dev": "nodemon \"./src/index.js\"",
+    "start": "node \"./src/index.js\"",
     "lint": "eslint src/**/*.js",
     "format": "eslint src/**/*.js --fix",
     "prettier-format": "prettier -w ."
