@@ -1,4 +1,5 @@
 "use strict";
+require("./pgEnum-fix");
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class user extends Model {
@@ -9,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      user.hasOne(models.secret, {
+        foreignKey: "userId",
+        as: "secrets",
+        onDelete: "CASCADE"
+      });
     }
     toJSON() {
       return { ...this.get(), id: undefined };
@@ -24,34 +30,38 @@ module.exports = (sequelize, DataTypes) => {
       firstname: {
         type: DataTypes.STRING,
         allowNull: false,
-        vaidate: {
+        validate: {
           len: [3, 25],
-          notEmpty: false
+          notEmpty: true
         }
       },
       lastname: {
         type: DataTypes.STRING,
         allowNull: false,
-        vaidate: {
+        validate: {
           len: [3, 25],
-          notEmpty: false
+          notEmpty: true
         }
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+          isEmail: true
+        }
       },
-      isAdmin: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: false
+      role: {
+        type: DataTypes.ENUM("customer", "admin", "field_agent"),
+        defaultValue: "customer"
       },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
-        vaidate: {
-          min: 10
+        validate: {
+          len: [16, 100],
+          notEmpty: true,
+          notNull: true
         }
       }
     },

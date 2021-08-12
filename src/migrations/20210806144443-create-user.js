@@ -2,12 +2,6 @@
 module.exports = {
   up: async (queryInterface, DataTypes) => {
     await queryInterface.createTable("users", {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER
-      },
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -16,34 +10,37 @@ module.exports = {
       firstname: {
         type: DataTypes.STRING,
         allowNull: false,
-        vaidate: {
+        validate: {
           len: [3, 25],
-          notEmpty: false
+          notEmpty: true
         }
       },
       lastname: {
         type: DataTypes.STRING,
         allowNull: false,
-        vaidate: {
+        validate: {
           len: [3, 25],
-          notEmpty: false
+          notEmpty: true
         }
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
+        validate: {
+          isEmail: true
+        }
       },
-      isAdmin: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: false
+      role: {
+        type: DataTypes.ENUM("customer", "admin", "field_agent"),
+        defaultValue: "customer"
       },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
-        vaidate: {
-          min: 10
+        validate: {
+          len: [16, 100],
+          notEmpty: true
         }
       },
       updatedAt: {
