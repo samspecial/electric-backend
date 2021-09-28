@@ -17,3 +17,10 @@ exports.authenticateJWT = (req, res, next) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.authCheck = (req, res, next) => {
+  if (!req.session || !req.session.clientId) {
+    return res.status(402).json({ error: "Unauthorized access" });
+  }
+  next();
+};

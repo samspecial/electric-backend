@@ -1,4 +1,5 @@
 const express = require("express");
+const session = require("./middlewares/session");
 
 const app = express();
 
@@ -12,6 +13,10 @@ async function main() {
 main();
 
 app.use(express.json());
+
+//Configur redis
+
+app.use(session);
 
 app.use("/api/auth", authRoutes);
 app.use("/", (req, res) => {

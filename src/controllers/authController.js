@@ -67,6 +67,7 @@ exports.confirmEmail = async (req, res) => {
 exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
+    req.session = "TestingValue";
     const currentUser = await user.findOne({ where: { email } });
     if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
       return res.status(401).json({ error: "Incorrect email or password" });
