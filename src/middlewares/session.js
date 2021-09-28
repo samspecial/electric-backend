@@ -1,4 +1,4 @@
-const session = require("Express-session");
+const session = require("express-session");
 const connectRedis = require("connect-redis");
 const redisClient = require("../database/redis");
 const redisStore = connectRedis(session);
