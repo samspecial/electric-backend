@@ -4,7 +4,8 @@ const { user } = require("../models");
 const { sendEmail } = require("../helpers/emailSender");
 require("dotenv").config();
 
-const { ACTIVATION_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
+const { ACTIVATION_TOKEN_SECRET, ACCESS_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
+
 const createToken = (payload) => {
   return jwt.sign(payload, ACTIVATION_TOKEN_SECRET, { expiresIn: JWT_TIMEOUT });
 };
@@ -24,7 +25,6 @@ exports.createUser = async (req, res) => {
     };
 
     const activationToken = createToken(userObj);
-    console.log(activationToken);
 
     const url = `${CLIENT_URL}/api/auth/activate/${activationToken}`;
     const msg = {
@@ -46,8 +46,8 @@ exports.createUser = async (req, res) => {
 
 exports.confirmEmail = async (req, res) => {
   try {
-    const { activationToken } = req.body;
-    const decodeUser = jwt.verify(activationToken, ACTIVATION_TOKEN_SECRET);
+    const { token } = req.params;
+    const decodeUser = jwt.verify(token, ACTIVATION_TOKEN_SECRET);
     if (!decodeUser) return res.status(403).json({ error: "unauthorized access token" });
     const newUser = await user.create(decodeUser);
     newUser.save();
@@ -62,12 +62,12 @@ exports.confirmEmail = async (req, res) => {
     return res.status(500).json({ error: error.message || "Server error" });
   }
 };
+
 //  @ method POST
 //  @ desc User authentication using GOOGLE
 exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    req.session = "TestingValue";
     const currentUser = await user.findOne({ where: { email } });
     if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
       return res.status(401).json({ error: "Incorrect email or password" });
@@ -76,7 +76,7 @@ exports.signin = async (req, res) => {
       email: currentUser.email,
       role: currentUser.role
     };
-    const token = jwt.sign(payload, SECRET, { expiresIn: JWT_TIMEOUT });
+    const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: JWT_TIMEOUT });
     return res.status(200).json({ token, status: "success" });
   } catch (error) {
     return res.status(500).json({ error: error.message || "Server error" });

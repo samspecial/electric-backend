@@ -8,12 +8,12 @@ module.exports = session({
     client: redisClient
   }),
   secret: "MY_SECRET_REDIS",
-  sveUninitialized: false,
+  saveUninitialized: false,
   resave: false,
   name: "sessionId",
   cookie: {
     secure: false, //if this is true, only transmit cookie over https
     httpOnly: true, //if true, it prevents client side javascript from reading the cookie
-    maxAge: 1000 * 60 * 60
+    maxAge: 1000 * 60 * 60 //session maxAge in milliseconds
   }
 });

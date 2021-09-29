@@ -9,7 +9,8 @@
     "dev": "nodemon \"./src/index.js\"",
     "lint": "eslint src/**/*.js",
     "format": "eslint src/**/*.js --fix",
-    "prettier-format": "prettier -w ."
+    "prettier-format": "prettier -w .",
+    "build": "sequelize db:migrate --env production --app er-solution"
   },
   "repository": {
     "type": "git",
