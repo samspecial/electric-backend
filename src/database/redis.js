@@ -5,7 +5,7 @@ const redis = require("redis");
 let redisClient;
 
 if (process.env.NODE_ENV === "production") {
-  redisClient = redis.createClient(process.env.REDIS_URL, {
+  redisClient = redis.createClient(process.env.REDIS_TLS_URL, {
     tls: {
       rejectUnauthorized: false
     }
