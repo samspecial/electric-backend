@@ -1,27 +1,7 @@
 "use strict";
-require("./pgEnum-fix");
-const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
-  class user extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-      user.hasOne(models.secret, {
-        foreignKey: "userId",
-        as: "secrets",
-        onDelete: "CASCADE"
-      });
-    }
-    toJSON() {
-      return { ...this.get(), id: undefined };
-    }
-  }
-  user.init(
-    {
+module.exports = {
+  up: async (queryInterface, DataTypes) => {
+    await queryInterface.createTable("users", {
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -60,15 +40,16 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           len: [16, 100],
-          notEmpty: true,
-          notNull: true
+          notEmpty: true
         }
+      },
+      updatedAt: {
+        allowNull: false,
+        type: DataTypes.DATE
       }
-    },
-    {
-      sequelize,
-      modelName: "user"
-    }
-  );
-  return user;
+    });
+  },
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.dropTable("users");
+  }
 };
