@@ -4,10 +4,10 @@ const { user } = require("../models");
 const { sendEmail } = require("../helpers/emailSender");
 require("dotenv").config();
 
-const { ACTIVATION_TOKEN_SECRET, ACCESS_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
+const { ACTIVATION_TOKEN, ACCESS_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
 
 const createToken = (payload) => {
-  return jwt.sign(payload, ACTIVATION_TOKEN_SECRET, { expiresIn: JWT_TIMEOUT });
+  return jwt.sign(payload, ACTIVATION_TOKEN, { expiresIn: JWT_TIMEOUT });
 };
 //  @ method POST
 //  @ desc User registration
@@ -47,7 +47,7 @@ exports.createUser = async (req, res) => {
 exports.confirmEmail = async (req, res) => {
   try {
     const { token } = req.params;
-    const decodeUser = jwt.verify(token, ACTIVATION_TOKEN_SECRET);
+    const decodeUser = jwt.verify(token, ACTIVATION_TOKEN);
     if (!decodeUser) return res.status(403).json({ error: "unauthorized access token" });
     const newUser = await user.create(decodeUser);
     newUser.save();
