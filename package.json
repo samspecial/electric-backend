@@ -10,7 +10,7 @@
     "lint": "eslint src/**/*.js",
     "format": "eslint src/**/*.js --fix",
     "prettier-format": "prettier -w .",
-    "build": "sequelize db:migrate --env production --app er-solution"
+    "build": "sequelize db:migrate"
   },
   "repository": {
     "type": "git",
