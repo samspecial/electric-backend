@@ -1,5 +1,6 @@
 const express = require("express");
 const session = require("./middlewares/session");
+const corsMiddleware = require("./middlewares/cors");
 
 const app = express();
 
@@ -14,6 +15,10 @@ async function main() {
 main();
 
 app.use(express.json());
+
+//Cors
+app.options("*", corsMiddleware);
+app.use(corsMiddleware);
 
 //Configur redis
 

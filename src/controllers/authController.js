@@ -6,9 +6,11 @@ require("dotenv").config();
 
 const { ACTIVATION_TOKEN, ACCESS_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
 
-const createToken = (payload) => {
+const createActivationToken = (payload) => {
   return jwt.sign(payload, ACTIVATION_TOKEN, { expiresIn: JWT_TIMEOUT });
 };
+
+const createToken = (payload) => jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: JWT_TIMEOUT });
 //  @ method POST
 //  @ desc User registration
 exports.createUser = async (req, res) => {
@@ -24,7 +26,7 @@ exports.createUser = async (req, res) => {
       password: hashPassword
     };
 
-    const activationToken = createToken(userObj);
+    const activationToken = createActivationToken(userObj);
 
     const url = `${CLIENT_URL}/api/auth/activate/${activationToken}`;
     const msg = {
@@ -76,7 +78,8 @@ exports.signin = async (req, res) => {
       email: currentUser.email,
       role: currentUser.role
     };
-    const token = jwt.sign(payload, ACCESS_TOKEN_SECRET, { expiresIn: JWT_TIMEOUT });
+    req.session.user = payload;
+    const token = createToken(payload);
     return res.status(200).json({ token, status: "success" });
   } catch (error) {
     return res.status(500).json({ error: error.message || "Server error" });

@@ -19,7 +19,7 @@ exports.authenticateJWT = (req, res, next) => {
 };
 
 exports.authCheck = (req, res, next) => {
-  if (!req.session || !req.session.clientId) {
+  if (!req.session || !req.session.user) {
     return res.status(402).json({ error: "Unauthorized access" });
   }
   next();
