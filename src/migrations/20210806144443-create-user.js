@@ -32,8 +32,8 @@ module.exports = {
         }
       },
       role: {
-        type: DataTypes.ENUM("customer", "admin", "field_agent"),
-        defaultValue: "customer"
+        type: DataTypes.STRING,
+        allowNull: false
       },
       password: {
         type: DataTypes.STRING,

@@ -15,7 +15,7 @@ const createToken = (payload) => jwt.sign(payload, ACCESS_TOKEN_SECRET, { expire
 //  @ desc User registration
 exports.createUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
+    const { firstname, lastname, email, password, role } = req.body;
     const currentUser = await user.findOne({ where: { email } });
     if (currentUser) return res.status(401).json({ error: "User already exist" });
     const hashPassword = await bcrypt.hash(password, 12);
@@ -23,7 +23,8 @@ exports.createUser = async (req, res) => {
       firstname,
       lastname,
       email,
-      password: hashPassword
+      password: hashPassword,
+      role
     };
 
     const activationToken = createActivationToken(userObj);
