@@ -43,7 +43,7 @@ exports.createUser = async (req, res) => {
     sendEmail(msg);
     return res.status(200).json({ status: "success", message: "Please confirm your email" });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Server error" });
+    return res.status(500).json({ error: error || "Server error" });
   }
 };
 
