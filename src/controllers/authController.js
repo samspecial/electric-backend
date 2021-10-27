@@ -14,8 +14,8 @@ const createToken = (payload) => jwt.sign(payload, ACCESS_TOKEN_SECRET, { expire
 //  @ method POST
 //  @ desc User registration
 exports.createUser = async (req, res) => {
+  const { firstname, lastname, email, password } = req.body;
   try {
-    const { firstname, lastname, email, password } = req.body;
     const currentUser = await user.findOne({ where: { email } });
     if (currentUser) return res.status(401).json({ error: "User already exist" });
     const hashPassword = await bcrypt.hash(password, 12);
@@ -42,7 +42,7 @@ exports.createUser = async (req, res) => {
     sendEmail(msg);
     return res.status(200).json({ status: "success", message: "Please confirm your email" });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Server error" });
+    return res.status(500).json({ error: error || "Server error" });
   }
 };
 

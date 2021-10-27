@@ -1,5 +1,5 @@
 const cors = require("cors");
-const whitelist = new Set(["https://electricrescue.com"]);
+const whitelist = new Set(["http://localhost:1234"]);
 
 const corsOptions = {
   optionsSuccessStatus: 200,
