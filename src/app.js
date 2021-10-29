@@ -1,6 +1,8 @@
 const express = require("express");
 const session = require("./middlewares/session");
 const corsMiddleware = require("./middlewares/cors");
+const helmet = require("helmet");
+const logger = require("morgan");
 
 const app = express();
 
@@ -13,7 +15,7 @@ async function main() {
 }
 
 main();
-
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //Cors
@@ -23,6 +25,12 @@ app.use(corsMiddleware);
 //Configur redis
 
 app.use(session);
+
+app.use(helmet());
+
+// Logger
+
+app.use(logger("common"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);

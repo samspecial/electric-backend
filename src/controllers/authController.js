@@ -79,9 +79,9 @@ exports.signin = async (req, res) => {
       email: currentUser.email,
       role: currentUser.role
     };
+
     req.session.user = payload;
-    const token = createToken(payload);
-    return res.status(200).json({ token, status: "success" });
+    return res.status(200).json({ data: { status: "success" } });
   } catch (error) {
     return res.status(500).json({ error: error.message || "Server error" });
   }
