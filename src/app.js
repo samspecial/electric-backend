@@ -2,6 +2,7 @@ const express = require("express");
 const session = require("./middlewares/session");
 const corsMiddleware = require("./middlewares/cors");
 const helmet = require("helmet");
+const compression = require("compression");
 const logger = require("morgan");
 
 const app = express();
@@ -18,19 +19,32 @@ main();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.set("trust proxy", 1);
+
 //Cors
-app.options("*", corsMiddleware);
 app.use(corsMiddleware);
+app.options("*", corsMiddleware);
 
 //Configur redis
 
 app.use(session);
 
 app.use(helmet());
-
+app.use(compression());
 // Logger
+logger.token("sessionid", function (req, res, param) {
+  return req.sessionID;
+});
+logger.token("user", function (req, res, param) {
+  return req.session.user;
+});
 
-app.use(logger("common"));
+app.use(
+  logger(
+    ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :user :sessionid'
+  )
+);
+// app.use(logger("common"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api", protectedRoutes);

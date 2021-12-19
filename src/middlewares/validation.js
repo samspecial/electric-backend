@@ -19,15 +19,15 @@ exports.signInValidator = [
 
 exports.validatorResults = (req, res, next) => {
   const result = validationResult(req);
-
-  if (result.isEmpty()) {
-    return next();
+  try {
+    if (result.isEmpty()) {
+      next();
+    }
+  } catch (error) {
+    const extractedErrors = [];
+    result.array().map((err) => extractedErrors.push({ [err.param]: err.msg }));
+    res.status(422).json({
+      errors: extractedErrors
+    });
   }
-
-  const extractedErrors = [];
-  result.array().map((err) => extractedErrors.push({ [err.param]: err.msg }));
-  console.log(extractedErrors);
-  return res.status(422).json({
-    errors: extractedErrors
-  });
 };

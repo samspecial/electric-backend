@@ -29,7 +29,8 @@ exports.createUser = async (req, res) => {
 
     const activationToken = createActivationToken(userObj);
 
-    const url = `${CLIENT_URL}/api/auth/activate/${activationToken}`;
+    const url = `${CLIENT_URL}api/auth/activate/${activationToken}`;
+
     const msg = {
       to: email, // Change to your recipient
       from: "psalmueloye@gmail.com", // Change to your verified sender
@@ -41,7 +42,7 @@ exports.createUser = async (req, res) => {
     };
 
     sendEmail(msg);
-    return res.status(200).json({ status: "success", message: "Please confirm your email" });
+    return res.status(200).json({ status: "success", message: "Please confirm your email", token: activationToken });
   } catch (error) {
     return res.status(500).json({ error: error || "Server error" });
   }
@@ -49,7 +50,7 @@ exports.createUser = async (req, res) => {
 
 exports.confirmEmail = async (req, res) => {
   try {
-    const { token } = req.params;
+    const { token } = req.body;
     const decodeUser = jwt.verify(token, ACTIVATION_TOKEN);
     if (!decodeUser) return res.status(403).json({ error: "unauthorized access token" });
     const newUser = await user.create(decodeUser);
@@ -72,8 +73,9 @@ exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const currentUser = await user.findOne({ where: { email } });
-    if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
-      return res.status(401).json({ error: "Incorrect email or password" });
+    if (!currentUser || !(await bcrypt.compare(password, currentUser.password))) {
+      return res.status(401).json({ status: "error", message: "Incorrect email or password" });
+    }
     const payload = {
       id: currentUser.uuid,
       email: currentUser.email,
@@ -81,9 +83,10 @@ exports.signin = async (req, res) => {
     };
 
     req.session.user = payload;
-    return res.status(200).json({ data: { status: "success" } });
+    return res.status(200).json({ status: "success", user: payload });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Server error" });
+    console.log(error);
+    res.status(500).json({ error: "status", message: "Something went wrong" });
   }
 };
 
