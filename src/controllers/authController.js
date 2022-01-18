@@ -83,6 +83,8 @@ exports.signin = async (req, res) => {
     };
 
     req.session.user = payload;
+    payload.connId = req.session.id;
+
     return res.status(200).json({ status: "success", user: payload });
   } catch (error) {
     console.log(error);
@@ -90,6 +92,9 @@ exports.signin = async (req, res) => {
   }
 };
 
+// exports.logout = async (req, res) => {
+
+// }
 // const JWT = require("jsonwebtoken");
 // const User = require("../models/User.model");
 // const Token = require("../models/Token.model");
