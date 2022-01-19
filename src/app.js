@@ -10,6 +10,7 @@ const app = express();
 const { sequelize } = require("./models/index");
 const authRoutes = require("./routes/authRoute");
 const protectedRoutes = require("./routes/protectedRoute");
+const subscriptionRoutes = require("./routes/subscriptionRoute");
 
 async function main() {
   await sequelize.sync({ alter: true });
@@ -47,6 +48,7 @@ app.use(
 // app.use(logger("common"));
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", subscriptionRoutes);
 app.use("/api", protectedRoutes);
 
 app.use("/", (req, res) => {
