@@ -4,7 +4,7 @@ const { createUser, signin, confirmEmail } = require("../controllers/authControl
 const { validatorResults, signUpValidator, signInValidator } = require("../middlewares/validation");
 
 router.post("/signup", signUpValidator, validatorResults, createUser);
-router.get("/activate/:token", confirmEmail);
+router.post("/activate", confirmEmail);
 router.post("/signin", signInValidator, validatorResults, signin);
 
 module.exports = router;

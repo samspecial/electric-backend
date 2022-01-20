@@ -15,7 +15,7 @@ const createToken = (payload) => jwt.sign(payload, ACCESS_TOKEN_SECRET, { expire
 //  @ desc User registration
 exports.createUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password } = req.body;
+    const { firstname, lastname, email, password, role } = req.body;
     const currentUser = await user.findOne({ where: { email } });
     if (currentUser) return res.status(401).json({ error: "User already exist" });
     const hashPassword = await bcrypt.hash(password, 12);
@@ -23,12 +23,14 @@ exports.createUser = async (req, res) => {
       firstname,
       lastname,
       email,
-      password: hashPassword
+      password: hashPassword,
+      role
     };
 
     const activationToken = createActivationToken(userObj);
 
-    const url = `${CLIENT_URL}/api/auth/activate/${activationToken}`;
+    const url = `${CLIENT_URL}api/auth/activate/${activationToken}`;
+
     const msg = {
       to: email, // Change to your recipient
       from: "psalmueloye@gmail.com", // Change to your verified sender
@@ -40,15 +42,15 @@ exports.createUser = async (req, res) => {
     };
 
     sendEmail(msg);
-    return res.status(200).json({ status: "success", message: "Please confirm your email" });
+    return res.status(200).json({ status: "success", message: "Please confirm your email", token: activationToken });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Server error" });
+    return res.status(500).json({ error: error || "Server error" });
   }
 };
 
 exports.confirmEmail = async (req, res) => {
   try {
-    const { token } = req.params;
+    const { token } = req.body;
     const decodeUser = jwt.verify(token, ACTIVATION_TOKEN);
     if (!decodeUser) return res.status(403).json({ error: "unauthorized access token" });
     const newUser = await user.create(decodeUser);
@@ -71,21 +73,28 @@ exports.signin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const currentUser = await user.findOne({ where: { email } });
-    if (!currentUser || !(await bcrypt.compare(password, currentUser.password)))
-      return res.status(401).json({ error: "Incorrect email or password" });
+    if (!currentUser || !(await bcrypt.compare(password, currentUser.password))) {
+      return res.status(401).json({ status: "error", message: "Incorrect email or password" });
+    }
     const payload = {
       id: currentUser.uuid,
       email: currentUser.email,
       role: currentUser.role
     };
+
     req.session.user = payload;
-    const token = createToken(payload);
-    return res.status(200).json({ token, status: "success" });
+    payload.connId = req.session.id;
+
+    return res.status(200).json({ status: "success", user: payload });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Server error" });
+    console.log(error);
+    res.status(500).json({ error: "status", message: "Something went wrong" });
   }
 };
 
+// exports.logout = async (req, res) => {
+
+// }
 // const JWT = require("jsonwebtoken");
 // const User = require("../models/User.model");
 // const Token = require("../models/Token.model");
