@@ -7,7 +7,7 @@ module.exports = {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      name: {
+      plan_name: {
         type: DataTypes.STRING,
         allowNull: false
       },
@@ -15,8 +15,13 @@ module.exports = {
         type: DataTypes.DECIMAL(20, 2),
         allowNull: false
       },
-      type: {
+
+      description: {
         type: DataTypes.STRING,
+        allowNull: false
+      },
+      duration: {
+        type: DataTypes.INTEGER,
         allowNull: false
       },
       package_benefit: {

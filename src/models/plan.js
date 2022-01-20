@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      name: {
+      plan_name: {
         type: DataTypes.STRING,
         allowNull: false
       },
@@ -30,8 +30,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL,
         allowNull: false
       },
-      type: {
+
+      description: {
         type: DataTypes.STRING,
+        allowNull: false
+      },
+      duration: {
+        type: DataTypes.INTEGER,
         allowNull: false
       },
       package_benefit: {
