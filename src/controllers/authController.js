@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { user } = require("../models");
 const { sendEmail } = require("../helpers/emailSender");
+const { createTrial } = require("../helpers/emailSender");
+const { generateCode } = require("../helpers/generatePassphrase");
 require("dotenv").config();
 
 const { ACTIVATION_TOKEN, ACCESS_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
@@ -15,34 +17,46 @@ const createToken = (payload) => jwt.sign(payload, ACCESS_TOKEN_SECRET, { expire
 //  @ desc User registration
 exports.createUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password, role } = req.body;
+    const { fullname, phoneNumber, email, password, role } = req.body;
+
     const currentUser = await user.findOne({ where: { email } });
     if (currentUser) return res.status(401).json({ error: "User already exist" });
     const hashPassword = await bcrypt.hash(password, 12);
     const userObj = {
-      firstname,
-      lastname,
+      fullname,
+      phoneNumber,
       email,
       password: hashPassword,
-      role
+      role: role.toLowerCase()
     };
+    if (userObj.role !== "customer") {
+      const newUser = await user.create(userObj);
+      // newUser.save();
+      return res.status(201).json({
+        status: "success",
+        message: "user created",
+        data: {
+          user: newUser
+        }
+      });
+    } else {
+      const activationToken = createActivationToken(userObj);
 
-    const activationToken = createActivationToken(userObj);
+      const url = `${CLIENT_URL}api/auth/activate/${activationToken}`;
 
-    const url = `${CLIENT_URL}api/auth/activate/${activationToken}`;
+      const msg = {
+        to: email, // Change to your recipient
+        from: "psalmueloye@gmail.com", // Change to your verified sender
+        subject: "Electric Rescue Account Confirmation",
+        html: `<h3>Hello ${fullname.split(" ")[0]}</h3>
+        <p>We are excited to have you here.</p>
+        <p>Kindly follow the link below to activate your account</p>
+        <p>This expires in 1 hour time. Click <a href=${url}>here</a> now.</p>`
+      };
 
-    const msg = {
-      to: email, // Change to your recipient
-      from: "psalmueloye@gmail.com", // Change to your verified sender
-      subject: "Account activation required",
-      html: `<h3>Hello ${firstname}</h3>
-      <p>We are excited to have you here.</p>
-      <p>Kindly follow the link below to activate your account</p>
-      <p>This expires in 1 hour time. Click <a href=${url}>here</a> now.</p>`
-    };
-
-    sendEmail(msg);
-    return res.status(200).json({ status: "success", message: "Please confirm your email", token: activationToken });
+      sendEmail(msg);
+      return res.status(200).json({ status: "success", message: "Please confirm your email", token: activationToken });
+    }
   } catch (error) {
     return res.status(500).json({ error: error || "Server error" });
   }
@@ -76,14 +90,13 @@ exports.signin = async (req, res) => {
     if (!currentUser || !(await bcrypt.compare(password, currentUser.password))) {
       return res.status(401).json({ status: "error", message: "Incorrect email or password" });
     }
+    generateCode();
     const payload = {
       id: currentUser.uuid,
-      email: currentUser.email,
       role: currentUser.role
     };
 
     req.session.user = payload;
-    payload.connId = req.session.id;
 
     return res.status(200).json({ status: "success", user: payload });
   } catch (error) {

@@ -7,15 +7,15 @@ module.exports = {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      firstname: {
+      fullname: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          len: [3, 25],
+          len: [4, 50],
           notEmpty: true
         }
       },
-      lastname: {
+      phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {

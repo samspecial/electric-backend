@@ -1,60 +1,50 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class plan extends Model {
+  class subscription extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-
     static associate(models) {
       // define association here
+      subscription.belongsTo(models.user, {
+        foreignKey: "userId",
+        as: "users"
+      });
 
-      plan.hasOne(models.subscription, {
-        onDelete: "CASCADE",
-        foreignKey: "planId"
+      subscription.belongsTo(models.plan, {
+        foreignKey: "planId",
+        as: "plans"
       });
     }
     toJSON() {
       return { ...this.get(), id: undefined };
     }
   }
-  plan.init(
+  subscription.init(
     {
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      plan_name: {
+
+      status: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      price: {
-        type: DataTypes.DECIMAL,
+
+      expired_date: {
+        type: DataTypes.DATE,
         allowNull: false
-      },
-      callToAction: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      description: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      duration: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-      },
-      plan_benefit: {
-        type: DataTypes.ARRAY(DataTypes.STRING)
       }
     },
     {
       sequelize,
-      modelName: "plan"
+      modelName: "subscription"
     }
   );
-  return plan;
+  return subscription;
 };

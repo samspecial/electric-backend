@@ -1,35 +1,26 @@
 "use strict";
 module.exports = {
   up: async (queryInterface, DataTypes) => {
-    await queryInterface.createTable("plans", {
+    await queryInterface.createTable("subscriptions", {
       uuid: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      plan_name: {
+      planId: {
+        type: DataTypes.UUID,
+        allowNull: false
+      },
+      status: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      price: {
-        type: DataTypes.DECIMAL(20, 2),
+      userId: {
+        type: DataTypes.UUID,
         allowNull: false
       },
-
-      description: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      callToAction: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      duration: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-      },
-      plan_benefit: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
+      expired_date: {
+        type: DataTypes.DATE,
         allowNull: false
       },
       createdAt: {
@@ -43,6 +34,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("plans");
+    await queryInterface.dropTable("subscriptions");
   }
 };
