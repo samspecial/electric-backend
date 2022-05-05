@@ -80,7 +80,7 @@ exports.deletePlan = async (req, res) => {
   const { id } = req.params;
   try {
     await plan.destroy({
-      where: { id }
+      where: { uuid: id }
     });
     return res.status(200).json({ status: "success", message: "Plan deleted successfully" });
   } catch (error) {
@@ -151,7 +151,7 @@ exports.deletePlan = async (req, res) => {
 exports.createSubscription = async (req, res) => {
   try {
     const { id } = req.session.user;
-    const { status, planId } = req.body;
+    const { planId } = req.body;
     const currentPlan = await plan.findOne({ where: { uuid: planId } });
     const { duration, plan_name } = currentPlan;
 
@@ -174,7 +174,7 @@ exports.createSubscription = async (req, res) => {
     const expiryDate = new Date(new Date().getTime() + duration * 24 * 60 * 60 * 1000);
 
     const newSubscription = await subscription.create({
-      status,
+      status: "ACTIVE",
       expired_date: expiryDate,
       userId: id,
       planId
@@ -191,7 +191,18 @@ exports.createSubscription = async (req, res) => {
 
 exports.getAllSubscriptions = async (req, res) => {
   try {
+    console.log("Subscription: ");
     const subscriptions = await subscription.findAll();
+    return res.status(200).json({ status: "success", data: subscriptions });
+  } catch (error) {
+    return res.status(500).json({ error: "server error" });
+  }
+};
+exports.getActiveSubscriptions = async (req, res) => {
+  try {
+    const { id } = req.session.user;
+    const subscriptions = await subscription.findAll({ where: { userId: id, status: "ACTIVE" } });
+
     return res.status(200).json({ status: "success", data: subscriptions });
   } catch (error) {
     return res.status(500).json({ error: "server error" });
@@ -200,8 +211,12 @@ exports.getAllSubscriptions = async (req, res) => {
 exports.getSubscriptions = async (req, res) => {
   try {
     const { id } = req.session.user;
-    const subscriptions = await subscription.findAll({ where: { userId: id, status: "ACTIVE" } });
-
+    console.log("User ID", id);
+    // const { id } = req.params;
+    const subscriptions = await subscription.findAll({
+      include: [{ model: plan, as: "plans" }],
+      where: { userId: id }
+    });
     return res.status(200).json({ status: "success", data: subscriptions });
   } catch (error) {
     return res.status(500).json({ error: "server error" });

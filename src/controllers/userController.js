@@ -12,22 +12,15 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-exports.confirmEmail = async (req, res) => {
+//  @ method GET
+//  @ desc User details retrieval
+exports.getUser = async (req, res) => {
+  const { id } = req.params;
   try {
-    const { token } = req.body;
-    const decodeUser = jwt.verify(token, ACTIVATION_TOKEN);
-    if (!decodeUser) return res.status(403).json({ error: "unauthorized access token" });
-    const newUser = await user.create(decodeUser);
-    newUser.save();
-    return res.status(201).json({
-      status: "success",
-      message: "user created",
-      data: {
-        user: newUser
-      }
-    });
+    const loggedInUser = await user.findOne({ where: { uuid: id } });
+    return res.status(200).json({ status: "success", data: loggedInUser });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Server error" });
+    return res.status(500).json({ error });
   }
 };
 
