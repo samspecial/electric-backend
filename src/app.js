@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoute");
 const userRoutes = require("./routes/userRoute");
 const subscriptionRoutes = require("./routes/subscriptionRoute");
 const paymentRoutes = require("./routes/paymentRoute");
+const ticketRoutes = require("./routes/ticketRoute");
 
 async function main() {
   await sequelize.sync({ alter: true });
@@ -51,6 +52,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/auth", subscriptionRoutes);
 app.use("/api/auth", paymentRoutes);
 app.use("/api/auth", userRoutes);
+app.use("/api/auth", ticketRoutes);
 
 app.use("/", (req, res) => {
   res.status(200).json({
