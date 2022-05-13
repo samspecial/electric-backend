@@ -15,9 +15,14 @@ module.exports = (sequelize, DataTypes) => {
         as: "secrets",
         onDelete: "CASCADE"
       });
+      user.hasOne(models.subscription, {
+        foreignKey: "userId",
+        as: "subscriptions",
+        onDelete: "CASCADE"
+      });
     }
     toJSON() {
-      return { ...this.get(), id: undefined };
+      return { ...this.get(), id: undefined, password: undefined };
     }
   }
   user.init(
@@ -27,15 +32,15 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
       },
-      firstname: {
+      fullname: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          len: [3, 25],
+          len: [4, 50],
           notEmpty: true
         }
       },
-      lastname: {
+      phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {

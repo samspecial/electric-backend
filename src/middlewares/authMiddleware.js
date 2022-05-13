@@ -19,8 +19,25 @@ exports.authenticateJWT = (req, res, next) => {
 };
 
 exports.authCheck = (req, res, next) => {
-  if (!req.session || !req.session.user) {
-    return res.status(401).json({ message: "Unauthorized access" });
+  try {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ message: "Unauthorized access" });
+    }
+    next();
+  } catch (error) {
+    res.status(403).json({ status: "failed", error: "Something went wrong" });
   }
-  next();
+};
+
+exports.authAdminCheck = (req, res, next) => {
+  try {
+    const { role } = req.session.user;
+    console.log("Administrator: ", role);
+    if (role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    next();
+  } catch (error) {
+    res.status(403).json({ status: "failed", error: "Something went wrong" });
+  }
 };

@@ -1,15 +1,17 @@
 "use strict";
 require("dotenv").config();
+console.log(process.env.NODE_ENV);
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    const { AdminOnePassword, AdminTwoPassword, AdminOneEmail, AdminTwoEmail } = process.env;
+    const { AdminOneEmail, AdminTwoEmail, AdminOnePassword, AdminTwoPassword } = process.env;
+
     await queryInterface.bulkInsert(
       "users",
       [
         {
           uuid: "7a38141f-4268-4150-b10e-f5ce75beb3b1",
-          firstname: "Samuel",
-          lastname: "Osinloye",
+          fullname: "Samuel Osinloye",
+          phoneNumber: "08066876531",
           email: AdminOneEmail,
           password: AdminOnePassword,
           role: "admin",
@@ -18,8 +20,8 @@ module.exports = {
         },
         {
           uuid: "eb55c024-48f7-4fcd-bc8a-a3ad0cc25eac",
-          firstname: "Emmanuel",
-          lastname: "Osinloye",
+          fullname: "Emmanuel Osinloye",
+          phoneNumber: "08165058537",
           email: AdminTwoEmail,
           password: AdminTwoPassword,
           role: "admin",

@@ -1,7 +1,10 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const { user } = require("../models");
+const crypto = require("crypto");
+const { user, otp } = require("../models");
 const { sendEmail } = require("../helpers/emailSender");
+const { createTrial } = require("../helpers/emailSender");
+const { generateCode, decryptCode } = require("../helpers/generatePassphrase");
 require("dotenv").config();
 
 const { ACTIVATION_TOKEN, ACCESS_TOKEN_SECRET, JWT_TIMEOUT, CLIENT_URL } = process.env;
@@ -15,34 +18,54 @@ const createToken = (payload) => jwt.sign(payload, ACCESS_TOKEN_SECRET, { expire
 //  @ desc User registration
 exports.createUser = async (req, res) => {
   try {
-    const { firstname, lastname, email, password, role } = req.body;
+    const { fullname, phoneNumber, email, password, role } = req.body;
+
     const currentUser = await user.findOne({ where: { email } });
     if (currentUser) return res.status(401).json({ error: "User already exist" });
     const hashPassword = await bcrypt.hash(password, 12);
     const userObj = {
-      firstname,
-      lastname,
+      fullname,
+      phoneNumber,
       email,
       password: hashPassword,
-      role
+      role: role.toLowerCase()
     };
+    if (userObj.role !== "customer") {
+      const newUser = await user.create(userObj);
+      // newUser.save();
+      return res.status(201).json({
+        status: "success",
+        message: "user created",
+        data: {
+          user: newUser
+        }
+      });
+    } else {
+      // const activationToken = createActivationToken(userObj);
+      const message = crypto.randomInt(100000, 999999).toString();
+      const verificationCode = await bcrypt.hash(message, 12);
 
-    const activationToken = createActivationToken(userObj);
+      //const url = `${CLIENT_URL}api/auth/activate/${activationToken}`;
+      await otp.create({ code: verificationCode, status: "ACTIVE" });
 
-    const url = `${CLIENT_URL}api/auth/activate/${activationToken}`;
+      const msg = {
+        to: email, // Change to your recipient
+        from: "psalmueloye@gmail.com", // Change to your verified sender
+        subject: "Electric Rescue Account Confirmation",
+        html: `<h3>Hello ${fullname.split(" ")[0]}</h3>
+        <p>We are excited to have you here.</p>
+        <p>Kindly follow the link below to activate your account</p>
+        <p>This expires in 2 hour time. Here is your ${message} code to get started. </p>`
+      };
 
-    const msg = {
-      to: email, // Change to your recipient
-      from: "psalmueloye@gmail.com", // Change to your verified sender
-      subject: "Account activation required",
-      html: `<h3>Hello ${firstname}</h3>
-      <p>We are excited to have you here.</p>
-      <p>Kindly follow the link below to activate your account</p>
-      <p>This expires in 1 hour time. Click <a href=${url}>here</a> now.</p>`
-    };
+      sendEmail(msg);
 
-    sendEmail(msg);
-    return res.status(200).json({ status: "success", message: "Please confirm your email", token: activationToken });
+      return res.status(200).json({
+        status: "success",
+        message: "Please confirm your email",
+        data: { ...userObj, token: verificationCode }
+      });
+    }
   } catch (error) {
     return res.status(500).json({ error: error || "Server error" });
   }
@@ -50,10 +73,33 @@ exports.createUser = async (req, res) => {
 
 exports.confirmEmail = async (req, res) => {
   try {
-    const { token } = req.body;
-    const decodeUser = jwt.verify(token, ACTIVATION_TOKEN);
-    if (!decodeUser) return res.status(403).json({ error: "unauthorized access token" });
-    const newUser = await user.create(decodeUser);
+    const { token, fullname, phoneNumber, email, password, role, otpString } = req.body;
+    // const decodeUser = jwt.verify(token, ACTIVATION_TOKEN);
+
+    const fetchCode = await otp.findOne({ where: { code: token } });
+    if (!fetchCode) return res.status(403).json({ error: "Unathourized" });
+    const isCodeMatch = await bcrypt.compare(otpString, fetchCode.code);
+    if (!isCodeMatch) return res.status(400).json({ error: "Mismatch verification code" });
+
+    const createdTime = new Date().getTime(fetchCode.createdAt);
+    const currentTime = new Date().getTime();
+    const isExpired = Math.abs((createdTime - currentTime) / 1000);
+    const isTime = 2 * 1000 * 60 * 60;
+    if (isExpired > +isTime) {
+      await otp.destroy({ where: { code: token } });
+      return res.status(400).json({ error: "Token already expired" });
+    }
+
+    fetchCode.status = "Expired";
+    fetchCode.save();
+    const userObj = {
+      fullname,
+      phoneNumber,
+      email,
+      password,
+      role
+    };
+    const newUser = await user.create(userObj);
     newUser.save();
     return res.status(201).json({
       status: "success",
@@ -76,18 +122,16 @@ exports.signin = async (req, res) => {
     if (!currentUser || !(await bcrypt.compare(password, currentUser.password))) {
       return res.status(401).json({ status: "error", message: "Incorrect email or password" });
     }
+
     const payload = {
       id: currentUser.uuid,
-      email: currentUser.email,
       role: currentUser.role
     };
 
     req.session.user = payload;
-    payload.connId = req.session.id;
 
     return res.status(200).json({ status: "success", user: payload });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ error: "status", message: "Something went wrong" });
   }
 };

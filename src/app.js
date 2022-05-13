@@ -9,7 +9,10 @@ const app = express();
 
 const { sequelize } = require("./models/index");
 const authRoutes = require("./routes/authRoute");
-const protectedRoutes = require("./routes/protectedRoute");
+const userRoutes = require("./routes/userRoute");
+const subscriptionRoutes = require("./routes/subscriptionRoute");
+const paymentRoutes = require("./routes/paymentRoute");
+const ticketRoutes = require("./routes/ticketRoute");
 
 async function main() {
   await sequelize.sync({ alter: true });
@@ -44,10 +47,12 @@ app.use(
     ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :user :sessionid'
   )
 );
-// app.use(logger("common"));
 
 app.use("/api/auth", authRoutes);
-app.use("/api", protectedRoutes);
+app.use("/api/auth", subscriptionRoutes);
+app.use("/api/auth", paymentRoutes);
+app.use("/api/auth", userRoutes);
+app.use("/api/auth", ticketRoutes);
 
 app.use("/", (req, res) => {
   res.status(200).json({
@@ -55,5 +60,4 @@ app.use("/", (req, res) => {
   });
 });
 
-// app.post("/");
 module.exports = app;
